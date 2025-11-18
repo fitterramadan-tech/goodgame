@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Pemakaian Gadget</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="topbar">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <h2>Pemakaian Gadget</h2>
+</div>
+<div class="sidebar" id="sidebar">
+    <a href="health.html">Cek Kesehatan</a>
+    <a href="gadget.html">Pemakaian Gadget</a>
+    <a href="history.html">History</a>
+    <a onclick="logout()">Logout</a>
+</div>
+
+<div class="page">
+    <h3>Tracker Waktu Gadget (Real Time)</h3>
+
+    <button onclick="startTracking()">Mulai</button>
+    <button onclick="stopTracking()">Stop</button>
+
+    <p>Total pemakaian: <span id="timeDisplay">0 jam 0 menit 0 detik</span></p>
+    <p id="warning"></p>
+</div>
+
+<script src="auth.js"></script>
+<script src="realtime.js"></script>
+<script src="script-ui.js"></script>
+</body>
+</html>
