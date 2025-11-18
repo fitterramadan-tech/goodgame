@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Cek Kesehatan</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="topbar">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <h2>Cek Kesehatan</h2>
+</div>
+<div class="sidebar" id="sidebar">
+    <a href="health.html">Cek Kesehatan</a>
+    <a href="gadget.html">Pemakaian Gadget</a>
+    <a href="history.html">History</a>
+    <a onclick="logout()">Logout</a>
+</div>
+
+<div class="page">
+    <h3>Cek Kesehatan</h3>
+    <input id="age" type="number" placeholder="Umur">
+    <input id="height" type="number" placeholder="Tinggi Badan (cm)">
+    <input id="weight" type="number" placeholder="Berat Badan (kg)">
+
+    <label><input type="checkbox" id="lelah"> Mudah Lelah</label><br>
+    <label><input type="checkbox" id="marah"> Gampang Marah</label><br>
+    <label><input type="checkbox" id="sakit"> Gampang Sakit</label><br><br>
+
+    <button onclick="checkHealth()">Cek</button>
+
+    <p id="healthResult"></p>
+</div>
+
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script src="script-ui.js"></script>
+</body>
+</html>
