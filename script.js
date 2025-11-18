@@ -1,160 +1,215 @@
-// Simple client-side logic. Semua data disimpan di localStorage.
+// ================================
+// SUPER APP SCRIPT.JS (Pilihan C)
+// ================================
+// Semua fitur login, AI kesehatan, AI gadget, dan history tracker
+// Berjalan penuh tanpa backend (localStorage sebagai database)
+// ---------------------------------------------------------------
 
-// --- Account management ---
-const btnLink = document.getElementById('btn-link');
-const btnChange = document.getElementById('btn-change');
+// -------------------------
+// 1. LOGIN & REGISTER SYSTEM
+// -------------------------
 
-btnLink.addEventListener('click', linkAccount);
-btnChange.addEventListener('click', changePassword);
+function registerUser() {
+    const username = document.getElementById("reg-username").value;
+    const password = document.getElementById("reg-password").value;
 
-function linkAccount(){
-  const u = document.getElementById('username').value.trim();
-  const p = document.getElementById('password').value;
-  if(!u || !p){
-    alert('Isi username dan password.'); return;
-  }
-  // Simpan sederhana — jangan gunakan ini di produksi
-  localStorage.setItem('sha_user', u);
-  localStorage.setItem('sha_pass', btoa(p));
-  alert('Akun tersimpan (di browser).');
+    if (!username || !password) {
+        alert("Isi semua field!");
+        return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (users[username]) {
+        alert("Username sudah terdaftar!");
+        return;
+    }
+
+    users[username] = {
+        password: btoa(password), // encode(base64)
+        history: []
+    };
+
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Registrasi berhasil! Silakan login.");
+    window.location.href = "index.html";
 }
 
-function changePassword(){
-  const u = document.getElementById('username').value.trim();
-  const oldp = prompt('Masukkan password lama:');
-  const storeUser = localStorage.getItem('sha_user');
-  const storePass = localStorage.getItem('sha_pass');
-  if(!storeUser){ alert('Belum ada akun yang ditautkan.'); return; }
-  if(u !== storeUser){ alert('Username tidak cocok dengan akun yang tersimpan.'); return; }
-  if(!oldp || btoa(oldp) !== storePass){ alert('Password lama salah.'); return; }
-  const newp = prompt('Masukkan password baru:');
-  if(!newp){ alert('Password baru tidak boleh kosong.'); return; }
-  localStorage.setItem('sha_pass', btoa(newp));
-  alert('Password telah diubah.');
+function loginUser() {
+    const username = document.getElementById("login-username").value;
+    const password = document.getElementById("login-password").value;
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (!users[username] || users[username].password !== btoa(password)) {
+        alert("Username atau password salah!");
+        return;
+    }
+
+    localStorage.setItem("currentUser", username);
+    window.location.href = "dashboard.html";
 }
 
-// --- Health check ---
-const btnCheck = document.getElementById('btn-check-health');
-const btnSave = document.getElementById('btn-save-entry');
-const healthResult = document.getElementById('health-result');
-
-btnCheck.addEventListener('click', doHealthCheck);
-btnSave.addEventListener('click', saveEntryToHistory);
-
-function doHealthCheck(){
-  const age = Number(document.getElementById('age').value);
-  const height = Number(document.getElementById('height').value);
-  const weight = Number(document.getElementById('weight').value);
-  const sympt = {
-    fatigue: document.getElementById('fatigue').checked,
-    anger: document.getElementById('anger').checked,
-    sick: document.getElementById('sick').checked
-  };
-  if(!age || !height || !weight){ alert('Isi umur, tinggi, dan berat.'); return; }
-  const bmi = computeBMI(height, weight);
-  const bmiCategory = bmiCategoryText(bmi);
-  const idealRange = 'BMI ideal: 18.5 - 24.9';
-  const idealWeight = idealWeightRange(height);
-
-  const suggestions = generateAISuggestions({age, height, weight, bmi, sympt});
-
-  healthResult.innerHTML = `
-    <strong>Hasil:</strong>
-    <div>Umur: ${age} tahun</div>
-    <div>Tinggi: ${height} cm</div>
-    <div>Berat: ${weight} kg</div>
-    <div>BMI: ${bmi.toFixed(2)} — <em>${bmiCategory}</em></div>
-    <div>${idealRange} (Perkiraan berat ideal: ${idealWeight.min} - ${idealWeight.max} kg)</div>
-    <div class="suggestion"><strong>Saran (AI sederhana):</strong><br/>${suggestions}</div>
-  `;
+function logoutUser() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "index.html";
 }
 
-function computeBMI(heightCm, weightKg){
-  const h = heightCm/100;
-  return weightKg / (h*h);
+// -------------------------
+// 2. MENU HAMBURGER
+// -------------------------
+
+function toggleMenu() {
+    const menu = document.getElementById("sideMenu");
+    menu.classList.toggle("open");
 }
 
-function bmiCategoryText(bmi){
-  if(bmi < 18.5) return 'Kurus (Underweight)';
-  if(bmi < 25) return 'Normal';
-  if(bmi < 30) return 'Kelebihan berat (Overweight)';
-  return 'Obesitas';
+// -------------------------
+// 3. AI KESEHATAN (Health AI)
+// -------------------------
+
+function calculateHealth() {
+    const age = parseInt(document.getElementById("age").value);
+    const height = parseFloat(document.getElementById("height").value);
+    const weight = parseFloat(document.getElementById("weight").value);
+
+    const tired = document.getElementById("tired").checked;
+    const angry = document.getElementById("angry").checked;
+    const sick = document.getElementById("sick").checked;
+
+    if (!age || !height || !weight) {
+        alert("Isi semua data kesehatan!");
+        return;
+    }
+
+    const heightM = height / 100;
+    const bmi = (weight / (heightM * heightM)).toFixed(1);
+
+    let status = "";
+    let advice = "";
+
+    if (bmi < 18.5) {
+        status = "Kurus";
+        advice = "Kamu perlu meningkatkan asupan nutrisi dan makan lebih teratur.";
+    } else if (bmi < 25) {
+        status = "Ideal";
+        advice = "Tubuhmu dalam kondisi ideal! Pertahankan pola hidup sehat.";
+    } else if (bmi < 30) {
+        status = "Berlebih";
+        advice = "Coba kurangi gula, tepung, dan tingkatkan cardio ringan.";
+    } else {
+        status = "Obesitas";
+        advice = "Prioritaskan olahraga rutin dan kurangi kalori harian.";
+    }
+
+    // tambahan AI berdasarkan gejala
+    if (tired) advice += "
+• Kamu cepat lelah → Kurangi begadang dan perbanyak air putih.";
+    if (angry) advice += "
+• Mudah marah → Coba latihan pernapasan atau meditasi 5 menit.";
+    if (sick) advice += "
+• Gampang sakit → Tingkatkan konsumsi vitamin C dan tidur cukup.";
+
+    // hasil output
+    document.getElementById("bmi-result").innerText = bmi;
+    document.getElementById("health-status").innerText = status;
+    document.getElementById("health-advice").innerText = advice;
+
+    saveHistory({
+        type: "health",
+        age, height, weight,
+        bmi, status, tired, angry, sick,
+        advice,
+        time: Date.now()
+    });
 }
 
-function idealWeightRange(heightCm){
-  const h = heightCm/100;
-  const min = Math.round(18.5 * h * h);
-  const max = Math.round(24.9 * h * h);
-  return {min, max};
+// -------------------------
+// 4. AI PEMAKAIAN GADGET
+// -------------------------
+
+function checkGadget() {
+    const hours = parseFloat(document.getElementById("gadget-hours").value);
+
+    if (!hours && hours !== 0) {
+        alert("Masukkan jam penggunaan gadget!");
+        return;
+    }
+
+    const limit = 4;
+    let message = "";
+
+    if (hours > limit) {
+        message = `⚠ Kamu menggunakan gadget selama ${hours} jam. Sudah melewati batas aman!
+
+Saran Ai:
+• Istirahatkan mata 15 menit.
+• Lakukan peregangan leher.
+• Kurangi layar sebelum tidur.`;
+    } else {
+        message = `Pemakaian gadget masih aman (${hours} jam). Pertahankan pola sehat!`;
+    }
+
+    document.getElementById("gadget-result").innerText = message;
+
+    saveHistory({
+        type: "gadget",
+        hours,
+        result: message,
+        time: Date.now()
+    });
 }
 
-function generateAISuggestions({age, height, weight, bmi, sympt}){
-  // Catatan: ini *bukan* model AI eksternal; ini rule-based sederhana
-  const pieces = [];
-  // BMI advice
-  if(bmi < 18.5) pieces.push('Berat badan di bawah normal — pertimbangkan makan sumber kalori & protein berkualitas, dan periksa dengan tenaga medis bila ada penurunan berat mendadak.');
-  else if(bmi < 25) pieces.push('Berat badan ideal. Pertahankan pola makan seimbang dan olahraga teratur (3-5x/minggu).');
-  else if(bmi < 30) pieces.push('Sedikit kelebihan berat. Kurangi konsumsi gula dan makanan tinggi lemak, tingkatkan aktivitas fisik.');
-  else pieces.push('Obesitas — sebaiknya konsultasi ke profesional kesehatan untuk rencana diet & aktivitas.');
+// -------------------------
+// 5. HISTORY SYSTEM
+// -------------------------
 
-  // symptoms
-  if(sympt.fatigue) pieces.push('Cepat lelah: periksa kualitas tidur (target 7-9 jam), asupan zat besi/vitamin, dan hidrasi.');
-  if(sympt.anger) pieces.push('Gampang marah: coba teknik napas, meditasi singkat, dan cek beban stres harian. Olahraga ringan membantu regulasi emosi.');
-  if(sympt.sick) pieces.push('Gampang sakit: periksa imunitas (vitamin D/C), konsumsi makanan bergizi, dan hindari kontak dengan sumber infeksi saat memungkinkan.');
+function saveHistory(entry) {
+    const username = localStorage.getItem("currentUser");
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
 
-  // age-based tip
-  if(age >= 50) pieces.push('Di usia 50+, perhatikan cek kesehatan rutin (tekanan darah, gula darah, kolesterol).');
+    if (!users[username]) return;
 
-  // actionable small steps
-  pieces.push('Langkah cepat: catat 1 perubahan kecil yang bisa dilakukan minggu ini (contoh: tambah 1 porsi sayur/hari, tidur 30 menit lebih awal, atau kurangi 30 menit gadget).');
-
-  return pieces.map(p=>`• ${p}`).join('<br/>');
+    users[username].history.push(entry);
+    localStorage.setItem("users", JSON.stringify(users));
 }
 
-// --- Save to history ---
-function saveEntryToHistory(){
-  const age = Number(document.getElementById('age').value);
-  const height = Number(document.getElementById('height').value);
-  const weight = Number(document.getElementById('weight').value);
-  const gadgetMinutes = Number(document.getElementById('gadget-minutes').value) || 0;
-  if(!age || !height || !weight){ alert('Isi umur, tinggi, dan berat sebelum menyimpan.'); return; }
-  const bmi = computeBMI(height, weight);
-  const entry = {
-    id: Date.now(),
-    date: new Date().toISOString(),
-    age, height, weight, bmi, gadgetMinutes
-  };
-  const arr = JSON.parse(localStorage.getItem('sha_history') || '[]');
-  arr.push(entry);
-  localStorage.setItem('sha_history', JSON.stringify(arr));
-  alert('Tersimpan di history. Lihat halaman History.');
+function loadHistory() {
+    const username = localStorage.getItem("currentUser");
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (!users[username]) return;
+
+    const historyDiv = document.getElementById("history-list");
+    const items = users[username].history;
+
+    historyDiv.innerHTML = "";
+
+    items.forEach(h => {
+        const box = document.createElement("div");
+        box.className = "history-item";
+
+        if (h.type === "health") {
+            box.innerHTML = `
+                <h4>Kesehatan</h4>
+                <p><b>BMI:</b> ${h.bmi} (${h.status})</p>
+                <p><b>Saran AI:</b> ${h.advice}</p>
+                <p class="time">${new Date(h.time).toLocaleString()}</p>
+            `;
+        }
+        else if (h.type === "gadget") {
+            box.innerHTML = `
+                <h4>Gadget</h4>
+                <p>${h.result}</p>
+                <p class="time">${new Date(h.time).toLocaleString()}</p>
+            `;
+        }
+
+        historyDiv.appendChild(box);
+    });
 }
 
-// --- Gadget usage ---
-const btnGadget = document.getElementById('btn-check-gadget');
-const gadgetResult = document.getElementById('gadget-result');
-btnGadget.addEventListener('click', checkGadgetUsage);
-
-function checkGadgetUsage(){
-  const minutes = Number(document.getElementById('gadget-minutes').value);
-  const threshold = Number(document.getElementById('gadget-threshold').value);
-  if(isNaN(minutes)){ alert('Masukkan lama pemakaian gadget.'); return; }
-  if(minutes > threshold){
-    gadgetResult.innerHTML = `<div class="warning">Peringatan: Pemakaian gadget melebihi batas (${threshold} menit) — saat ini ${minutes} menit.</div>` +
-      `<div class="suggestion"><strong>Saran:</strong><br/>• Istirahatkan mata tiap 20 menit (aturan 20-20-20).<br/>• Ganti sebagian waktu dengan jalan singkat atau stretching.<br/>• Atur mode fokus / notifikasi untuk kurangi gangguan.</div>`;
-  } else {
-    gadgetResult.innerHTML = `Pemakaian gadget dalam batas aman (${minutes} / ${threshold} menit).<br/><small class="note">Ingat untuk tetap bergerak dan menjaga postur.</small>`;
-  }
-}
-
-// --- Initialize fields from storage if ada ---
-(function init(){
-  const u = localStorage.getItem('sha_user');
-  if(u) document.getElementById('username').value = u;
-})();
-
-// Optional: expose some functions for history page
-window._sha = {
-  getHistory: ()=> JSON.parse(localStorage.getItem('sha_history') || '[]'),
-  clearHistory: ()=> localStorage.removeItem('sha_history')
-};
+// muat otomatis jika halaman history
+if (window.location.pathname.includes("history.html")) {
+    window.onload = loadHistory;
+                       }
