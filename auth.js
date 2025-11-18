@@ -1,49 +1,36 @@
-// Fungsi Register
 function registerUser() {
-    const username = document.getElementById("regUser").value.trim();
-    const password = document.getElementById("regPass").value.trim();
+    const username = document.getElementById("regUser").value;
+    const password = document.getElementById("regPass").value;
 
-    if (!username || !password) {
-        alert("Username dan password wajib diisi!");
-        return;
-    }
+    if (!username || !password) return alert("Lengkapi semua data!");
 
     let users = JSON.parse(localStorage.getItem("users")) || [];
 
-    if (users.find(u => u.username === username)) {
-        alert("Username sudah digunakan!");
-        return;
-    }
+    if (users.find(u => u.username === username))
+        return alert("Username sudah digunakan!");
 
     users.push({ username, password });
     localStorage.setItem("users", JSON.stringify(users));
 
-    alert("Registrasi berhasil!");
-    window.location.href = "index.html";
+    alert("Berhasil daftar!");
+    location.href = "index.html";
 }
 
-// Fungsi Login
 function login() {
-    const username = document.getElementById("loginUser").value.trim();
-    const password = document.getElementById("loginPass").value.trim();
+    const username = document.getElementById("loginUser").value;
+    const password = document.getElementById("loginPass").value;
 
     let users = JSON.parse(localStorage.getItem("users")) || [];
 
-    const user = users.find(
-        u => u.username === username && u.password === password
-    );
+    let user = users.find(u => u.username === username && u.password === password);
 
-    if (!user) {
-        alert("Username atau password salah!");
-        return;
-    }
+    if (!user) return alert("Akun salah!");
 
     localStorage.setItem("loggedUser", username);
-    window.location.href = "dashboard.html";  // Sesuaikan halamanmu
+    location.href = "dashboard.html";
 }
 
-// Fungsi Logout (opsional)
 function logout() {
     localStorage.removeItem("loggedUser");
-    window.location.href = "index.html";
+    location.href = "index.html";
 }
