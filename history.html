@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>History</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="topbar">
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <h2>History</h2>
+</div>
+<div class="sidebar" id="sidebar">
+    <a href="health.html">Cek Kesehatan</a>
+    <a href="gadget.html">Pemakaian Gadget</a>
+    <a href="history.html">History</a>
+    <a onclick="logout()">Logout</a>
+</div>
+
+<div class="page">
+    <h3>History Aktivitas</h3>
+    <ul id="historyList"></ul>
+</div>
+
+<script src="auth.js"></script>
+<script src="script.js"></script>
+<script src="script-ui.js"></script>
+</body>
+</html>
